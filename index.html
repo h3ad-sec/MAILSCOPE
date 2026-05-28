@@ -7,7 +7,7 @@
   <meta name="description" content="MAILSCOPE by H3AD-SEC — Parse raw email headers. SPF, DKIM, DMARC verdicts. Hop chain analysis. Spoofing and impersonation detection.">
   <link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20260528b">
+  <link rel="stylesheet" href="css/style.css?v=20260528c">
 </head>
 <body class="dark">
 
@@ -75,7 +75,9 @@
       </div>
       <div class="nav-item">
         <a href="https://h3ad-sec.github.io/H3AD-IR/" target="_blank" rel="noopener">H3AD-IR</a>
-        <div class="nav-dropdown"><div class="nav-dropdown-inner"></div></div>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner">
+          <a href="https://h3ad-sec.github.io/PHISHBOOK/" target="_blank" rel="noopener">PHISHBOOK</a>
+        </div></div>
       </div>
       <div class="nav-divider"></div>
       <a href="mailto:h3adsec@gmail.com">CONTACT</a>
@@ -115,6 +117,7 @@
     <a href="https://h3ad-sec.github.io/H3AD-DF/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-DF ↗</a>
     <a href="https://h3ad-sec.github.io/REGSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ REGSCOPE ↗</a>
     <a href="https://h3ad-sec.github.io/H3AD-IR/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-IR ↗</a>
+    <a href="https://h3ad-sec.github.io/PHISHBOOK/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PHISHBOOK ↗</a>
     <a href="mailto:h3adsec@gmail.com" onclick="closeDrawer()">CONTACT</a>
   </div>
 
@@ -166,6 +169,7 @@
               </svg>
               RAW HEADERS
             </div>
+            <span class="header-count-chip" id="header-count-chip" style="display:none"></span>
           </div>
           <div class="panel-body">
             <textarea
@@ -204,6 +208,15 @@ Ctrl+Enter to analyze"></textarea>
                 <span style="color:var(--muted)">Client-side only. Nothing leaves your browser.</span>
               </div>
               <button class="btn-ghost" style="margin-top:12px;width:100%;justify-content:center;" onclick="loadSample()">LOAD SAMPLE HEADER</button>
+            </div>
+
+            <!-- Recent analyses -->
+            <div class="history-section">
+              <div class="hist-header">
+                <div class="tips-label">Recent</div>
+                <button class="btn-hist-clear" onclick="clearHistory()">CLEAR</button>
+              </div>
+              <div class="history-list" id="history-list"></div>
             </div>
           </div>
         </div>
@@ -250,6 +263,22 @@ Ctrl+Enter to analyze"></textarea>
             <div class="auth-badges" id="auth-badges"></div>
           </div>
 
+          <!-- ARC Chain (conditional) -->
+          <div class="result-card" id="arc-card" style="display:none">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <path d="M1 9.5C1 9.5 3 5 5.5 5.5C8 6 9.5 1 9.5 1" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+                  <circle cx="1" cy="9.5" r="1" fill="var(--accent)"/>
+                  <circle cx="9.5" cy="1" r="1" fill="var(--accent)"/>
+                </svg>
+                ARC CHAIN
+              </div>
+              <span class="card-meta" id="arc-meta"></span>
+            </div>
+            <div class="arc-chain card-body" id="arc-body"></div>
+          </div>
+
           <!-- First Hop IP -->
           <div class="first-hop-card" id="first-hop-section" style="display:none">
             <div class="fh-label">Origin IP</div>
@@ -263,6 +292,7 @@ Ctrl+Enter to analyze"></textarea>
                 ENRICH IN X-VERDIKT
               </button>
               <button class="btn-copy-sm" id="fh-copy">COPY</button>
+              <button class="btn-phishops" id="fh-phishops">PHISHOPS ↗</button>
             </div>
           </div>
 
@@ -378,12 +408,12 @@ Ctrl+Enter to analyze"></textarea>
       <span class="footer-sep">/</span>
       <span class="footer-project">MAILSCOPE</span>
       <span class="footer-sep">//</span>
-      <span>From · Reply-To · Return-Path · Received · Authentication-Results · Message-ID · X-Originating-IP · SPF · DKIM · DMARC · Hop Chain · Brand Impersonation · Domain Mismatch</span>
+      <span>SPF · DKIM · DMARC · ARC · Hop Chain · Brand Impersonation · Domain Mismatch · Homograph · Envelope Mismatch · Suspicious Subject · Date Validation · X-Spam</span>
     </div>
   </footer>
 
-  <script src="js/parser.js?v=20260528b"></script>
-  <script src="js/app.js?v=20260528b"></script>
+  <script src="js/parser.js?v=20260528c"></script>
+  <script src="js/app.js?v=20260528c"></script>
   <script>
     function toggleDrawer() { document.getElementById('navDrawer').classList.toggle('open'); }
     function closeDrawer()  { document.getElementById('navDrawer').classList.remove('open'); }
