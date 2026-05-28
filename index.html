@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAILSCOPE — Email Header Analyzer</title>
+  <meta name="description" content="MAILSCOPE by H3AD-SEC — Parse raw email headers. SPF, DKIM, DMARC verdicts. Hop chain analysis. Spoofing and impersonation detection.">
+  <link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=20260528b">
+</head>
+<body class="dark">
+
+  <nav class="nav">
+    <div class="hamburger" id="hamburger" onclick="toggleDrawer()"><span></span><span></span><span></span></div>
+    <a class="nav-brand" href="https://h3ad-sec.github.io" target="_blank" rel="noopener">
+      <img id="navLogo" src="https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png" alt="H3AD-SEC">
+    </a>
+    <a class="xv-nav-pill" href="https://h3ad-sec.github.io/MAILSCOPE/">
+      <span class="xv-pill-name"><span class="xv-pill-accent">MAIL</span><span class="xv-pill-text">SCOPE</span></span>
+      <span class="xv-pill-tagline">Email Header Analyzer</span>
+    </a>
+    <div class="nav-links">
+      <div class="nav-divider"></div>
+      <a href="https://h3ad-sec.github.io" target="_blank" rel="noopener">HOME</a>
+      <a href="https://h3ad-sec.github.io/H3AD/" target="_blank" rel="noopener">H3AD</a>
+      <div class="nav-divider"></div>
+      <div class="nav-item">
+        <a href="https://h3ad-sec.github.io/H3AD-X/" target="_blank" rel="noopener">H3AD-X</a>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner">
+          <a href="https://h3ad-sec.github.io/X-VERDIKT/" target="_blank" rel="noopener">X-VERDIKT</a>
+          <a href="https://h3ad-sec.github.io/PARSE-X/" target="_blank" rel="noopener">PARSE-X</a>
+          <a href="https://h3ad-sec.github.io/DNSCOPE/" target="_blank" rel="noopener">DNSCOPE</a>
+          <a href="https://h3ad-sec.github.io/MAILSCOPE/" target="_blank" rel="noopener" class="nav-current">MAILSCOPE</a>
+        </div></div>
+      </div>
+      <div class="nav-item">
+        <a href="https://h3ad-sec.github.io/H3AD-AI/" target="_blank" rel="noopener">H3AD-AI</a>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner">
+          <a href="https://h3ad-sec.github.io/INSIGHT-AI/" target="_blank" rel="noopener">INSIGHT-AI</a>
+          <a href="https://h3ad-sec.github.io/QUERYCRAFT-AI/" target="_blank" rel="noopener">QUERYCRAFT-AI</a>
+          <a href="https://h3ad-sec.github.io/FPLENS-AI/" target="_blank" rel="noopener">FPLENS-AI</a>
+          <a href="https://h3ad-sec.github.io/ATTMAP-AI/" target="_blank" rel="noopener">ATTMAP-AI</a>
+          <a href="https://h3ad-sec.github.io/CHRONO-AI/" target="_blank" rel="noopener">CHRONO-AI</a>
+          <a href="https://h3ad-sec.github.io/MALBRIEF-AI/" target="_blank" rel="noopener">MALBRIEF-AI</a>
+        </div></div>
+      </div>
+      <div class="nav-item">
+        <a href="https://h3ad-sec.github.io/H3AD-DETECT/" target="_blank" rel="noopener">H3AD-DETECT</a>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner">
+          <a href="https://h3ad-sec.github.io/TRACERULES/" target="_blank" rel="noopener">TRACERULES</a>
+        </div></div>
+      </div>
+      <div class="nav-item">
+        <a href="https://h3ad-sec.github.io/H3AD-HUNT/" target="_blank" rel="noopener">H3AD-HUNT</a>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner">
+          <a href="https://h3ad-sec.github.io/HYPOS/" target="_blank" rel="noopener">HYPOS</a>
+          <a href="https://h3ad-sec.github.io/PIVEX/" target="_blank" rel="noopener">PIVEX</a>
+          <a href="https://h3ad-sec.github.io/TRACEPULSE/" target="_blank" rel="noopener">TRACEPULSE</a>
+        </div></div>
+      </div>
+      <div class="nav-item">
+        <a href="https://h3ad-sec.github.io/H3AD-OPS/" target="_blank" rel="noopener">H3AD-OPS</a>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner">
+          <a href="https://h3ad-sec.github.io/QUICKTRACE/" target="_blank" rel="noopener">QUICKTRACE</a>
+          <a href="https://h3ad-sec.github.io/PHISHOPS/" target="_blank" rel="noopener">PHISHOPS</a>
+          <a href="https://h3ad-sec.github.io/SHIFTLOG/" target="_blank" rel="noopener">SHIFTLOG</a>
+        </div></div>
+      </div>
+      <div class="nav-item">
+        <a href="https://h3ad-sec.github.io/H3AD-DF/" target="_blank" rel="noopener">H3AD-DF</a>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner">
+          <a href="https://h3ad-sec.github.io/REGSCOPE/" target="_blank" rel="noopener">REGSCOPE</a>
+        </div></div>
+      </div>
+      <div class="nav-item">
+        <a href="https://h3ad-sec.github.io/H3AD-IR/" target="_blank" rel="noopener">H3AD-IR</a>
+        <div class="nav-dropdown"><div class="nav-dropdown-inner"></div></div>
+      </div>
+      <div class="nav-divider"></div>
+      <a href="mailto:h3adsec@gmail.com">CONTACT</a>
+    </div>
+    <div class="nav-right">
+      <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" role="button" aria-label="Toggle light/dark theme">
+        <div class="toggle-track"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="nav-drawer" id="navDrawer">
+    <a href="https://h3ad-sec.github.io" target="_blank" rel="noopener" onclick="closeDrawer()">HOME ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD-X/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-X ↗</a>
+    <a href="https://h3ad-sec.github.io/X-VERDIKT/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ X-VERDIKT ↗</a>
+    <a href="https://h3ad-sec.github.io/PARSE-X/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PARSE-X ↗</a>
+    <a href="https://h3ad-sec.github.io/DNSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ DNSCOPE ↗</a>
+    <a href="https://h3ad-sec.github.io/MAILSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub nav-current">↳ MAILSCOPE ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD-AI/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-AI ↗</a>
+    <a href="https://h3ad-sec.github.io/INSIGHT-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ INSIGHT-AI ↗</a>
+    <a href="https://h3ad-sec.github.io/QUERYCRAFT-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ QUERYCRAFT-AI ↗</a>
+    <a href="https://h3ad-sec.github.io/FPLENS-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ FPLENS-AI ↗</a>
+    <a href="https://h3ad-sec.github.io/ATTMAP-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ ATTMAP-AI ↗</a>
+    <a href="https://h3ad-sec.github.io/CHRONO-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ CHRONO-AI ↗</a>
+    <a href="https://h3ad-sec.github.io/MALBRIEF-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ MALBRIEF-AI ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD-DETECT/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-DETECT ↗</a>
+    <a href="https://h3ad-sec.github.io/TRACERULES/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ TRACERULES ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD-HUNT/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-HUNT ↗</a>
+    <a href="https://h3ad-sec.github.io/HYPOS/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ HYPOS ↗</a>
+    <a href="https://h3ad-sec.github.io/PIVEX/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PIVEX ↗</a>
+    <a href="https://h3ad-sec.github.io/TRACEPULSE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ TRACEPULSE ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD-OPS/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-OPS ↗</a>
+    <a href="https://h3ad-sec.github.io/QUICKTRACE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ QUICKTRACE ↗</a>
+    <a href="https://h3ad-sec.github.io/PHISHOPS/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PHISHOPS ↗</a>
+    <a href="https://h3ad-sec.github.io/SHIFTLOG/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ SHIFTLOG ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD-DF/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-DF ↗</a>
+    <a href="https://h3ad-sec.github.io/REGSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ REGSCOPE ↗</a>
+    <a href="https://h3ad-sec.github.io/H3AD-IR/" target="_blank" rel="noopener" onclick="closeDrawer()">H3AD-IR ↗</a>
+    <a href="mailto:h3adsec@gmail.com" onclick="closeDrawer()">CONTACT</a>
+  </div>
+
+  <section class="ms-hero">
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-breadcrumb">
+          <a href="https://h3ad-sec.github.io/H3AD-X/" target="_blank" rel="noopener">H3AD-X</a>
+          <span>/</span>
+          <span class="hero-current">MAILSCOPE</span>
+        </div>
+        <div class="hero-title">
+          <span class="hero-accent">MAIL</span><span class="hero-name">SCOPE</span>
+        </div>
+        <div class="hero-tagline">Email Header Analyzer · SPF · DKIM · DMARC · Hop Chain · Spoofing Detection</div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <span class="stat-num" id="stat-hops">—</span>
+          <span class="stat-label">Hops</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-flags">—</span>
+          <span class="stat-label">Risk Flags</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-high">—</span>
+          <span class="stat-label">High</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" id="stat-transit">—</span>
+          <span class="stat-label">Transit</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="ms-main">
+    <div class="ms-layout">
+
+      <!-- Input Panel -->
+      <aside>
+        <div class="ms-panel">
+          <div class="panel-header">
+            <div class="panel-label">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <rect x="1" y="1" width="10" height="10" rx="1" stroke="var(--accent)" stroke-width="1"/>
+                <path d="M3 4h6M3 6.5h4" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+              </svg>
+              RAW HEADERS
+            </div>
+          </div>
+          <div class="panel-body">
+            <textarea
+              class="ms-textarea"
+              id="ms-input"
+              placeholder="Paste raw email headers here.
+
+Copy from your email client:
+  Gmail: Show original
+  Outlook: File > Properties
+  Thunderbird: More > View Source
+
+Or paste from your SIEM / mail gateway logs.
+
+Ctrl+Enter to analyze"></textarea>
+
+            <div class="action-row">
+              <button class="btn-analyze" id="analyze-btn" onclick="runAnalysis()" disabled>
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+                  <path d="M10 10l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                ANALYZE
+              </button>
+              <button class="btn-ghost" onclick="clearAll()">CLEAR</button>
+              <span class="action-note">Ctrl+Enter</span>
+            </div>
+
+            <div class="tips-block">
+              <div class="tips-label">Parses</div>
+              <div class="tip-row"><span>From · To · Reply-To · Return-Path</span></div>
+              <div class="tip-row"><span>Authentication-Results</span> (SPF / DKIM / DMARC)</div>
+              <div class="tip-row"><span>Received</span> headers, hop chain, timestamps</div>
+              <div class="tip-row"><span>Message-ID · X-Mailer · X-Originating-IP</span></div>
+              <div class="tip-row" style="margin-top:10px;color:var(--muted)">
+                <span style="color:var(--muted)">Client-side only. Nothing leaves your browser.</span>
+              </div>
+              <button class="btn-ghost" style="margin-top:12px;width:100%;justify-content:center;" onclick="loadSample()">LOAD SAMPLE HEADER</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Results Column -->
+      <div class="results-col" id="results-col">
+
+        <!-- Copy analysis button (shown when results are present) -->
+        <div id="copy-analysis-row" style="display:none">
+          <button class="btn-copy-analysis" id="copy-analysis-btn" onclick="copyAnalysis()">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M3 1h8v8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            COPY ANALYSIS
+          </button>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state">
+          <svg class="empty-icon" width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <rect x="1" y="1" width="38" height="38" rx="3" stroke="var(--border)" stroke-width="1"/>
+            <path d="M8 14l12 8 12-8" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 14v14h24V14" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <div class="empty-text">Paste headers to analyze</div>
+          <div class="empty-sub">SPF, DKIM, DMARC verdicts. Hop chain. Sender mismatch and spoofing detection.</div>
+        </div>
+
+        <!-- Analysis results (hidden until analyzed) -->
+        <div id="results-section" style="display:none">
+
+          <!-- Verdict banner -->
+          <div class="verdict-banner verdict-clean" id="verdict-banner"></div>
+
+          <!-- Auth Status -->
+          <div class="result-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <path d="M5.5 1L1 3.5v3C1 8.9 3 10.5 5.5 10.5S10 8.9 10 6.5v-3L5.5 1z" stroke="var(--accent)" stroke-width="1" stroke-linejoin="round"/>
+                </svg>
+                AUTH STATUS
+              </div>
+            </div>
+            <div class="auth-badges" id="auth-badges"></div>
+          </div>
+
+          <!-- First Hop IP -->
+          <div class="first-hop-card" id="first-hop-section" style="display:none">
+            <div class="fh-label">Origin IP</div>
+            <div class="fh-ip" id="fh-ip"></div>
+            <div class="fh-actions">
+              <button class="btn-enrich" id="fh-enrich">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.2"/>
+                  <path d="M5.5 3v5M3 5.5h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+                ENRICH IN X-VERDIKT
+              </button>
+              <button class="btn-copy-sm" id="fh-copy">COPY</button>
+            </div>
+          </div>
+
+          <!-- Risk Flags -->
+          <div class="result-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <path d="M5.5 1L1 10h9L5.5 1z" stroke="var(--accent)" stroke-width="1" stroke-linejoin="round"/>
+                  <path d="M5.5 5v2.5" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+                  <circle cx="5.5" cy="9" r=".5" fill="var(--accent)"/>
+                </svg>
+                RISK FLAGS
+              </div>
+            </div>
+            <div class="risk-flags" id="risk-flags"></div>
+          </div>
+
+          <!-- Hop Chain -->
+          <div class="result-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <circle cx="2" cy="2" r="1.2" stroke="var(--accent)" stroke-width="1"/>
+                  <circle cx="9" cy="5.5" r="1.2" stroke="var(--accent)" stroke-width="1"/>
+                  <circle cx="2" cy="9" r="1.2" stroke="var(--accent)" stroke-width="1"/>
+                  <path d="M3 2.5l5 2.5M3 8.5l5-2.5" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+                </svg>
+                HOP CHAIN
+              </div>
+              <span class="card-meta" id="hop-chain-meta"></span>
+            </div>
+            <div class="hop-chain" id="hop-chain"></div>
+          </div>
+
+          <!-- Header Overview -->
+          <div class="result-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <rect x="1" y="1" width="9" height="9" rx="1" stroke="var(--accent)" stroke-width="1"/>
+                  <path d="M3 4h5M3 6.5h3" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+                </svg>
+                HEADER OVERVIEW
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="ov-table">
+                <tbody id="overview-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Sender Analysis -->
+          <div class="result-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <circle cx="5.5" cy="3.5" r="2" stroke="var(--accent)" stroke-width="1"/>
+                  <path d="M1.5 10c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+                </svg>
+                SENDER ANALYSIS
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="sa-table">
+                <tbody id="sender-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- X-Spam (conditional) -->
+          <div class="result-card" id="xspam-card" style="display:none">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <circle cx="5.5" cy="5.5" r="4.5" stroke="var(--accent)" stroke-width="1"/>
+                  <path d="M5.5 3v3.5" stroke="var(--accent)" stroke-width="1" stroke-linecap="round"/>
+                  <circle cx="5.5" cy="8.5" r=".5" fill="var(--accent)"/>
+                </svg>
+                SPAM FILTER
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="ov-table"><tbody id="xspam-tbody"></tbody></table>
+            </div>
+          </div>
+
+          <!-- Raw Headers -->
+          <div class="result-card">
+            <div class="raw-toggle-row" onclick="toggleRaw()">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <rect x="1" y="2" width="9" height="7" rx="1" stroke="var(--accent)" stroke-width="1"/>
+                  <path d="M3.5 5.5l1.5 1.5L8 4" stroke="var(--accent)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                RAW HEADERS
+              </div>
+              <button class="btn-raw-toggle" id="raw-toggle">EXPAND</button>
+            </div>
+            <pre class="raw-content" id="raw-content"></pre>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <a href="https://h3ad-sec.github.io" target="_blank" rel="noopener" class="footer-brand">H3AD-SEC</a>
+      <span class="footer-sep">/</span>
+      <span class="footer-project">MAILSCOPE</span>
+      <span class="footer-sep">//</span>
+      <span>From · Reply-To · Return-Path · Received · Authentication-Results · Message-ID · X-Originating-IP · SPF · DKIM · DMARC · Hop Chain · Brand Impersonation · Domain Mismatch</span>
+    </div>
+  </footer>
+
+  <script src="js/parser.js?v=20260528b"></script>
+  <script src="js/app.js?v=20260528b"></script>
+  <script>
+    function toggleDrawer() { document.getElementById('navDrawer').classList.toggle('open'); }
+    function closeDrawer()  { document.getElementById('navDrawer').classList.remove('open'); }
+    document.addEventListener('click', e => {
+      const d = document.getElementById('navDrawer'), h = document.getElementById('hamburger');
+      if (d.classList.contains('open') && !d.contains(e.target) && !h.contains(e.target)) closeDrawer();
+    });
+
+    function updateNavLogo(t) {
+      const el = document.getElementById('navLogo');
+      if (el) el.src = t === 'light'
+        ? 'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-light.png'
+        : 'https://raw.githubusercontent.com/h3ad-sec/h3ad-sec.github.io/main/logo-dark.png';
+    }
+    function toggleTheme() {
+      const l = document.body.classList.toggle('light');
+      document.body.classList.toggle('dark', !l);
+      const t = l ? 'light' : 'dark';
+      localStorage.setItem('h3ad-theme', t);
+      updateNavLogo(t);
+    }
+    const _t = localStorage.getItem('h3ad-theme');
+    if (_t === 'light') { document.body.classList.add('light'); document.body.classList.remove('dark'); updateNavLogo('light'); }
+    else { document.body.classList.add('dark'); document.body.classList.remove('light'); }
+
+    (function(){var pill=document.querySelector('.xv-nav-pill'),links=document.querySelector('.nav-links'),toggle=document.querySelector('.theme-toggle'),G=20;function check(){if(!links)return;document.body.classList.remove('nav-compact');links.style.visibility='hidden';var lr=links.getBoundingClientRect(),pr=pill?pill.getBoundingClientRect().right:60,tl=toggle?toggle.getBoundingClientRect().left:window.innerWidth-60;links.style.visibility='';document.body.classList.toggle('nav-compact',(pr+G>lr.left)||(lr.right+G>tl));}check();window.addEventListener('resize',check);})();
+  </script>
+</body>
+</html>
