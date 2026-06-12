@@ -417,7 +417,6 @@ Ctrl+Enter to analyze"></textarea>
       <span class="footer-sep">//</span>
       <span>SPF · DKIM · DMARC · ARC · Hop Chain · Brand Impersonation · Domain Mismatch · Homograph · Envelope Mismatch · Suspicious Subject · Date Validation · X-Spam</span>
     </div>
-      <span class="footer-sep">&nbsp;//&nbsp;</span><span id="h3gc-n" style="font-family:'Share Tech Mono',monospace;opacity:.6;font-size:.8em"></span><span style="opacity:.35;font-size:.75em;margin-left:3px;letter-spacing:.08em">VISITORS</span>
   </footer>
 
   <script src="js/parser.js?v=20260528c"></script>
@@ -449,10 +448,15 @@ Ctrl+Enter to analyze"></textarea>
 
     (function(){var pill=document.querySelector('.xv-nav-pill'),links=document.querySelector('.nav-links'),toggle=document.querySelector('.theme-toggle'),G=20;function check(){if(!links)return;document.body.classList.remove('nav-compact');links.style.visibility='hidden';var lr=links.getBoundingClientRect(),pr=pill?pill.getBoundingClientRect().right:60,tl=toggle?toggle.getBoundingClientRect().left:window.innerWidth-60;links.style.visibility='';document.body.classList.toggle('nav-compact',(pr+G>lr.left)||(lr.right+G>tl));}check();window.addEventListener('resize',check);})();
   </script>
-  <!-- h3gc-v2 -->
+  <div id="h3gc" style="position:fixed;bottom:16px;right:16px;display:flex;align-items:center;gap:6px;background:rgba(8,10,18,.9);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:5px 10px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.45);z-index:9500;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);pointer-events:none;">
+    <svg width="7" height="7" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="3.5" stroke="rgba(74,222,128,.7)" stroke-width="1"/><circle cx="4" cy="4" r="1.5" fill="rgba(74,222,128,.8)"/></svg>
+    <span id="h3gc-n" style="color:rgba(74,222,128,.9);font-weight:600">—</span>
+    <span style="opacity:.5">VISITORS</span>
+  </div>
+  <!-- h3gc-v3 -->
   <script>
     (function(){
-      var key = (location.pathname.replace(/\//g,'') || 'hub').toLowerCase();
+      var key = (location.pathname.split('/').join('') || 'hub').toLowerCase();
       var base = 'https://api.counterapi.dev/v1/h3ad-sec/' + key;
       var lk = 'h3gc_c_' + key;
       var sk = 'h3gc_s_' + key;
@@ -469,6 +473,11 @@ Ctrl+Enter to analyze"></textarea>
           if(d.count!=null){ store(lk,d.count); if(el) el.textContent=Number(d.count).toLocaleString(); }
         })
         .catch(function(){});
+      var gsk = 'h3gc_s_total';
+      if (!session(gsk)) {
+        sessionSet(gsk,'1');
+        fetch('https://api.counterapi.dev/v1/h3ad-sec/total/up').catch(function(){});
+      }
     })();
   </script>
 </body>
