@@ -181,6 +181,61 @@ const MailParser = (() => {
     'salesforce','intuit','quickbooks'
   ];
 
+  // Canonical domains per brand — a From domain must equal or be a subdomain
+  // of one of these to count as "actually the brand". Anything else (including
+  // combosquats like paypal-secure.net that merely CONTAIN the brand name) is
+  // treated as impersonation, not as a safe match.
+  const BRAND_DOMAINS = {
+    paypal:        ['paypal.com'],
+    microsoft:     ['microsoft.com', 'live.com', 'outlook.com', 'office.com', 'microsoftonline.com'],
+    google:        ['google.com', 'gmail.com'],
+    apple:         ['apple.com', 'icloud.com'],
+    amazon:        ['amazon.com'],
+    netflix:       ['netflix.com'],
+    facebook:      ['facebook.com', 'fb.com'],
+    instagram:     ['instagram.com'],
+    twitter:       ['twitter.com', 'x.com'],
+    linkedin:      ['linkedin.com'],
+    dropbox:       ['dropbox.com'],
+    docusign:      ['docusign.com', 'docusign.net'],
+    chase:         ['chase.com'],
+    wellsfargo:    ['wellsfargo.com'],
+    citibank:      ['citibank.com', 'citi.com'],
+    bankofamerica: ['bankofamerica.com'],
+    hsbc:          ['hsbc.com'],
+    barclays:      ['barclays.com', 'barclays.co.uk'],
+    adobe:         ['adobe.com'],
+    salesforce:    ['salesforce.com'],
+    intuit:        ['intuit.com'],
+    quickbooks:    ['quickbooks.com', 'intuit.com']
+  };
+
+  function isBrandDomain(domain, brand) {
+    const canon = BRAND_DOMAINS[brand] || [];
+    return canon.some(c => domain === c || domain.endsWith('.' + c));
+  }
+
+  // ── Private / non-routable IP check (for origin-IP resolution) ────────────
+
+  function isPrivateIp(ip) {
+    if (!ip) return true;
+    if (ip.includes(':')) {
+      const low = ip.toLowerCase();
+      return low === '::1' || low === '::' || low.startsWith('fe80:') ||
+        low.startsWith('fc') || low.startsWith('fd');
+    }
+    const parts = ip.split('.').map(Number);
+    if (parts.length !== 4 || parts.some(n => isNaN(n) || n < 0 || n > 255)) return true;
+    const [a, b] = parts;
+    if (a === 10) return true;
+    if (a === 172 && b >= 16 && b <= 31) return true;
+    if (a === 192 && b === 168) return true;
+    if (a === 127) return true;
+    if (a === 169 && b === 254) return true;
+    if (a === 0) return true;
+    return false;
+  }
+
   const SUSPICIOUS_SUBJECT = [
     /\[urgent\]/i, /\[action\s+required\]/i, /\[important\]/i, /\[security\s+alert\]/i,
     /verify\s+your\s+(account|identity|email|payment|information)/i,
@@ -195,26 +250,155 @@ const MailParser = (() => {
     /immediately\s+(verify|confirm|update)/i,
   ];
 
-  // Digit/character substitution homograph check
+  // ── Punycode / IDN decode (RFC 3492 bootstring) ────────────────────────────
+  // Real homograph phishing ships as punycode (xn--...) — Chrome/Outlook won't
+  // render raw Cyrillic/Greek domains as-is, so attackers register the ACE
+  // form. Decoding it back to Unicode is required to catch that class at all.
+
+  function punycodeDecodeLabel(label) {
+    if (!/^xn--/i.test(label)) return null;
+    const input = label.slice(4);
+    const base = 36, tMin = 1, tMax = 26, skew = 38, damp = 700, initialBias = 72, initialN = 128;
+    let n = initialN, i = 0, bias = initialBias;
+    const output = [];
+    let basicEnd = input.lastIndexOf('-');
+    if (basicEnd < 0) basicEnd = 0;
+    for (let j = 0; j < basicEnd; j++) {
+      const c = input.charCodeAt(j);
+      if (c >= 0x80) return null;
+      output.push(c);
+    }
+    let index = basicEnd > 0 ? basicEnd + 1 : 0;
+    const len = input.length;
+    try {
+      while (index < len) {
+        const oldi = i;
+        let w = 1;
+        for (let k = base; ; k += base) {
+          if (index >= len) return null;
+          const c = input.charCodeAt(index++);
+          let digit;
+          if (c >= 48 && c <= 57) digit = c - 22;
+          else if (c >= 65 && c <= 90) digit = c - 65;
+          else if (c >= 97 && c <= 122) digit = c - 97;
+          else return null;
+          i += digit * w;
+          const t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+          if (digit < t) break;
+          w *= (base - t);
+        }
+        const outLen = output.length + 1;
+        let delta = oldi === 0 ? Math.floor((i - oldi) / damp) : Math.floor((i - oldi) / 2);
+        delta += Math.floor(delta / outLen);
+        let k2 = 0;
+        while (delta > ((base - tMin) * tMax) >> 1) {
+          delta = Math.floor(delta / (base - tMin));
+          k2 += base;
+        }
+        bias = k2 + Math.floor((base - tMin + 1) * delta / (delta + skew));
+        n += Math.floor(i / outLen);
+        i %= outLen;
+        if (n < 0 || n > 0x10FFFF) return null;
+        output.splice(i, 0, n);
+        i++;
+      }
+      return output.map(cp => String.fromCodePoint(cp)).join('');
+    } catch (_) { return null; }
+  }
+
+  function decodeIDN(domain) {
+    if (!domain || !/xn--/i.test(domain)) return null;
+    let changed = false;
+    const decoded = domain.split('.').map(label => {
+      if (/^xn--/i.test(label)) {
+        const u = punycodeDecodeLabel(label);
+        if (u) { changed = true; return u; }
+      }
+      return label;
+    });
+    return changed ? decoded.join('.') : null;
+  }
+
+  // Common Cyrillic/Greek confusables seen in real IDN homograph phishing,
+  // folded to their Latin look-alike before the digit-substitution check.
+  const CONFUSABLES = {
+    'а':'a', 'е':'e', 'р':'p', 'о':'o', 'с':'c',
+    'у':'y', 'х':'x', 'і':'i', 'ѕ':'s', 'ј':'j',
+    'ԁ':'d', 'һ':'h', 'ɡ':'g', 'ν':'v', 'ο':'o',
+    'ρ':'p', 'ϲ':'c', 'в':'b', 'н':'h', 'м':'m',
+    'т':'t', 'ӏ':'l'
+  };
+
+  function foldConfusables(str) {
+    let out = '';
+    for (const ch of str) out += CONFUSABLES[ch] || ch;
+    return out;
+  }
+
+  // Digit/character substitution + Unicode-confusable homograph check.
+  // Returns { brand, idn, unicodeDomain } or null.
   function detectHomograph(domain) {
     if (!domain) return null;
-    const parts = domain.split('.');
+    const idnDecoded = decodeIDN(domain);
+    const effective  = idnDecoded || domain;
+    const parts = effective.split('.');
     const sld   = parts.length >= 2 ? parts[parts.length - 2] : parts[0];
-    const normalized = sld
+    const rawParts = domain.split('.');
+    const rawSld   = (rawParts.length >= 2 ? rawParts[rawParts.length - 2] : rawParts[0]).toLowerCase();
+    const normalized = foldConfusables(sld).toLowerCase()
       .replace(/0/g, 'o').replace(/1/g, 'l').replace(/3/g, 'e')
       .replace(/4/g, 'a').replace(/5/g, 's').replace(/6/g, 'g')
       .replace(/7/g, 't').replace(/8/g, 'b').replace(/\|/g, 'l')
       .replace(/vv/g, 'w').replace(/rn/g, 'm').replace(/nn/g, 'm');
     for (const brand of BRANDS) {
-      if (normalized.includes(brand) && !sld.includes(brand)) return brand;
+      if (normalized.includes(brand) && !rawSld.includes(brand)) {
+        return { brand, idn: !!idnDecoded, unicodeDomain: idnDecoded };
+      }
     }
     return null;
+  }
+
+  // ── Microsoft 365 / Exchange Online signals ────────────────────────────────
+  // Most enterprise mail is M365. X-Forefront-Antispam-Report's CIP is the
+  // connecting IP as Microsoft's edge actually observed it (far more reliable
+  // than parsing the Received chain, which Exchange frequently rewrites), and
+  // compauth is Microsoft's own composite anti-spoof verdict — it can fail
+  // even when raw SPF/DKIM/DMARC all show pass, and is worth surfacing on its
+  // own.
+
+  function parseM365(single, authArr) {
+    const far = single['x-forefront-antispam-report'] || '';
+    const sclHeader = single['x-ms-exchange-organization-scl'] || '';
+    let scl = null, cip = null, ctry = null, ptr = null;
+    if (far) {
+      const sclM  = far.match(/\bSCL:(-?\d+)/i);
+      const cipM  = far.match(/\bCIP:([0-9a-fA-F:.]+)/i);
+      const ctryM = far.match(/\bCTRY:([A-Za-z]{2})/i);
+      const ptrM  = far.match(/\bPTR:([^;]+)/i);
+      if (sclM)  scl  = parseInt(sclM[1], 10);
+      if (cipM)  cip  = cipM[1];
+      if (ctryM) ctry = ctryM[1].toUpperCase();
+      if (ptrM)  ptr  = ptrM[1].trim();
+    }
+    if (scl === null && sclHeader) {
+      const n = parseInt(sclHeader, 10);
+      if (!isNaN(n)) scl = n;
+    }
+    let compauth = null, compauthReason = null;
+    for (const val of authArr) {
+      const caM = val.match(/\bcompauth=([a-z]+)/i);
+      const reM = val.match(/\bcompauth=[a-z]+\s+reason=(\d+)/i);
+      if (caM && !compauth) compauth = caM[1].toLowerCase();
+      if (reM && !compauthReason) compauthReason = reM[1];
+    }
+    if (scl === null && cip === null && ctry === null && ptr === null && !compauth) return null;
+    return { scl, cip, ctry, ptr, compauth, compauthReason };
   }
 
   function detectRisks(data) {
     const {
       auth, fromInfo, replyToInfo, returnPathInfo, msgIdDomain, hops,
-      subject, dateStr, deliveredTo, xOriginalTo, toInfo
+      subject, dateStr, deliveredTo, xOriginalTo, toInfo, m365
     } = data;
     const flags = [];
 
@@ -254,18 +438,37 @@ const MailParser = (() => {
     }
 
     // ── Impersonation ──────────────────────────────────────────────────────
+    // Flags whenever the domain isn't actually the brand's own domain —
+    // including combosquats (paypal-secure.net) that contain the brand name
+    // but aren't it, not just domains with zero textual relation to the brand.
     const displayLower = (fromInfo.display || '').toLowerCase();
     for (const brand of BRANDS) {
-      if (displayLower.includes(brand) && fromInfo.domain && !fromInfo.domain.includes(brand)) {
-        flags.push({ code: 'BRAND_IMPERSONATION', level: 'high', title: `Brand impersonation: ${brand}`, detail: `Display name claims "${fromInfo.display}" but the actual sending domain is "${fromInfo.domain}".` });
+      if (displayLower.includes(brand) && fromInfo.domain && !isBrandDomain(fromInfo.domain, brand)) {
+        const combosquat = fromInfo.domain.includes(brand);
+        flags.push({
+          code: 'BRAND_IMPERSONATION', level: 'high',
+          title: `Brand impersonation: ${brand}`,
+          detail: combosquat
+            ? `Display name claims "${fromInfo.display}" and the domain "${fromInfo.domain}" contains "${brand}" but is not an actual ${brand} domain. Classic lookalike/combosquat pattern.`
+            : `Display name claims "${fromInfo.display}" but the actual sending domain is "${fromInfo.domain}", unrelated to any known ${brand} domain.`
+        });
         break;
       }
     }
 
     // ── Homograph domain ───────────────────────────────────────────────────
-    const homoBrand = detectHomograph(fromInfo.domain);
-    if (homoBrand) {
-      flags.push({ code: 'HOMOGRAPH', level: 'high', title: `Homograph domain impersonating: ${homoBrand}`, detail: `Domain "${fromInfo.domain}" uses character substitution to resemble "${homoBrand}". Digit/lookalike substitution detected.` });
+    const homoResult = detectHomograph(fromInfo.domain);
+    if (homoResult) {
+      const idnNote = homoResult.idn
+        ? ` This is a punycode-encoded domain — decoded it reads as "${homoResult.unicodeDomain}", a Unicode homoglyph attack, not a plain digit substitution.`
+        : '';
+      flags.push({ code: 'HOMOGRAPH', level: 'high', title: `Homograph domain impersonating: ${homoResult.brand}`, detail: `Domain "${fromInfo.domain}" uses character substitution to resemble "${homoResult.brand}".${idnNote}` });
+    }
+
+    // ── IDN / punycode domain (independent of brand match) ─────────────────
+    const idnFrom = decodeIDN(fromInfo.domain);
+    if (idnFrom && !(homoResult && homoResult.idn)) {
+      flags.push({ code: 'IDN_DOMAIN', level: 'medium', title: 'Internationalized (punycode) domain', detail: `Domain "${fromInfo.domain}" decodes to "${idnFrom}". Punycode/IDN domains are rare in legitimate business email and are a common vehicle for homoglyph lookalikes — verify manually.` });
     }
 
     // ── Suspicious subject ─────────────────────────────────────────────────
@@ -324,6 +527,24 @@ const MailParser = (() => {
       }
     }
 
+    // ── Microsoft 365 signals ───────────────────────────────────────────────
+    if (m365) {
+      if (m365.scl !== null && m365.scl >= 5) {
+        flags.push({
+          code: 'M365_SCL_HIGH', level: m365.scl >= 9 ? 'high' : 'medium',
+          title: `Microsoft SCL ${m365.scl} (spam-flagged)`,
+          detail: `Exchange Online's Spam Confidence Level is ${m365.scl}${m365.scl >= 9 ? ' — high-confidence phishing/spam per Microsoft’s own filtering.' : ' — flagged as likely spam by Microsoft’s own filtering.'}`
+        });
+      }
+      if (m365.compauth === 'fail') {
+        flags.push({
+          code: 'M365_COMPAUTH_FAIL', level: 'high',
+          title: 'Microsoft composite authentication failed',
+          detail: `compauth=fail${m365.compauthReason ? ` (reason=${m365.compauthReason})` : ''}. Microsoft's combined SPF/DKIM/DMARC plus sender-reputation check failed this message, independent of the raw SPF/DKIM/DMARC results above.`
+        });
+      }
+    }
+
     return flags;
   }
 
@@ -347,9 +568,19 @@ const MailParser = (() => {
 
     const arc  = parseARC(multi.arcSeals, multi.arcAuthResults);
     const hops = multi.received.map(parseReceivedHop);
+    const m365 = parseM365(single, multi.authResults);
 
     const xIp = (single['x-originating-ip'] || single['x-sender-ip'] || single['x-source-ip'] || '').replace(/[[\]\s]/g, '');
-    const firstHopIp = xIp || (hops.length > 0 ? hops[hops.length - 1].ip : null) || null;
+    // Walk oldest → newest and take the first hop with a routable public IP,
+    // skipping localhost/RFC1918 relays (e.g. PHPMailer-on-a-VPS artifacts)
+    // that would otherwise get misreported as the "origin".
+    const chronological  = [...hops].reverse();
+    const publicHop      = chronological.find(h => h.ip && !isPrivateIp(h.ip));
+    const oldestHopIp     = hops.length > 0 ? hops[hops.length - 1].ip : null;
+    // M365's CIP is the connecting IP as Microsoft's own edge observed it —
+    // more authoritative than the Received chain when present, since Exchange
+    // Online frequently rewrites/strips external Received headers.
+    const firstHopIp = (m365 && m365.cip) || xIp || (publicHop ? publicHop.ip : oldestHopIp) || null;
 
     const decodedSubject = decodeRFC2047(single['subject'] || '');
     const transitSeconds = calcTransit(hops);
@@ -361,7 +592,7 @@ const MailParser = (() => {
     const risks = detectRisks({
       auth, fromInfo, replyToInfo, returnPathInfo, msgIdDomain, hops,
       subject: decodedSubject, dateStr: single['date'] || '',
-      deliveredTo, xOriginalTo, toInfo
+      deliveredTo, xOriginalTo, toInfo, m365
     });
 
     // Total header count for the chip
@@ -383,7 +614,7 @@ const MailParser = (() => {
       },
       fromInfo, replyToInfo, returnPathInfo, toInfo,
       msgIdDomain, auth, receivedSPF, arc, hops,
-      firstHopIp, transitSeconds, xSpam, risks,
+      firstHopIp, transitSeconds, xSpam, m365, risks,
       headerCount, allHeaders: single
     };
   }

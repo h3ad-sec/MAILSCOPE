@@ -34,8 +34,52 @@ Content-Type: text/html; charset=UTF-8`;
 
 const HISTORY_KEY = 'mailscope_history';
 const HISTORY_MAX = 5;
+const VIEW_KEY = 'mailscope_view';
 
 let _lastResult = null;
+
+// ─── View switching (Overview / Workspace) ─────────────────────────────────────
+
+function switchView(view) {
+  document.getElementById('view-overview').style.display = view === 'overview' ? '' : 'none';
+  document.getElementById('view-workspace').style.display = view === 'overview' ? 'none' : '';
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  try { localStorage.setItem(VIEW_KEY, view); } catch (_) {}
+  window.scrollTo({ top: 0 });
+}
+
+// When the OVERVIEW/WORKSPACE tabs don't fit between the nav pill and the
+// theme toggle (narrow windows), move the same DOM node into a full-width
+// bar above the page content instead of squeezing or hiding it.
+(function () {
+  const vt = document.getElementById('view-tabs');
+  const pill = document.querySelector('.xv-nav-pill');
+  const toggle = document.querySelector('.theme-toggle');
+  const wrap = document.getElementById('msViewWrap');
+  if (!vt || !wrap) return;
+  let inNav = true;
+  const G = 20;
+  function check() {
+    const pr = pill ? pill.getBoundingClientRect().right : 60;
+    const tl = toggle ? toggle.getBoundingClientRect().left : window.innerWidth - 60;
+    const wasBelow = vt.classList.contains('below');
+    if (wasBelow) vt.classList.remove('below');
+    const needed = vt.getBoundingClientRect().width || 150;
+    if (wasBelow) vt.classList.add('below');
+    const fits = (tl - pr) > (needed + G * 2);
+    if (fits && !inNav) {
+      vt.classList.remove('below');
+      document.querySelector('.nav-right').insertBefore(vt, toggle);
+      inNav = true;
+    } else if (!fits && inNav) {
+      vt.classList.add('below');
+      wrap.insertBefore(vt, wrap.firstChild);
+      inNav = false;
+    }
+  }
+  check();
+  window.addEventListener('resize', check);
+})();
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
@@ -173,6 +217,7 @@ function renderAll(r) {
   renderRiskFlags(r.risks);
   renderFirstHop(r.firstHopIp, r);
   renderXSpam(r.xSpam);
+  renderM365(r.m365);
   renderRaw(r.allHeaders);
 
   const high = r.risks.filter(f => f.level === 'high').length;
@@ -480,6 +525,28 @@ function renderXSpam(xSpam) {
   ).join('');
 }
 
+// ─── Microsoft 365 signals ─────────────────────────────────────────────────────
+
+function renderM365(m365) {
+  const card = document.getElementById('m365-card');
+  if (!card) return;
+  if (!m365) { card.style.display = 'none'; return; }
+  card.style.display = '';
+
+  const sclNote = m365.scl === null ? '' : (m365.scl >= 9 ? ' (high-confidence spam/phish)' : m365.scl >= 5 ? ' (spam-flagged)' : '');
+  const rows = [
+    ['SCL',      m365.scl !== null ? m365.scl + sclNote : ''],
+    ['CIP',      m365.cip],
+    ['COUNTRY',  m365.ctry],
+    ['PTR',      m365.ptr],
+    ['COMPAUTH', m365.compauth ? m365.compauth.toUpperCase() + (m365.compauthReason ? ` (reason=${m365.compauthReason})` : '') : '']
+  ].filter(([, v]) => v);
+
+  document.getElementById('m365-tbody').innerHTML = rows.map(([k, v]) =>
+    `<tr><td class="ov-key">${k}</td><td class="ov-val">${esc(v)}</td></tr>`
+  ).join('');
+}
+
 // ─── Raw headers ─────────────────────────────────────────────────────────────
 
 function renderRaw(headers) {
@@ -598,6 +665,16 @@ function buildExportText(r) {
 
   if (r.firstHopIp) { L.push(`ORIGIN IP: ${r.firstHopIp}`); L.push(''); }
 
+  if (r.m365) {
+    L.push('MICROSOFT 365 SIGNALS');
+    if (r.m365.scl !== null)  L.push(`  SCL:       ${r.m365.scl}`);
+    if (r.m365.cip)           L.push(`  CIP:       ${r.m365.cip}`);
+    if (r.m365.ctry)          L.push(`  COUNTRY:   ${r.m365.ctry}`);
+    if (r.m365.ptr)           L.push(`  PTR:       ${r.m365.ptr}`);
+    if (r.m365.compauth)      L.push(`  COMPAUTH:  ${r.m365.compauth.toUpperCase()}${r.m365.compauthReason ? ' (reason=' + r.m365.compauthReason + ')' : ''}`);
+    L.push('');
+  }
+
   if (r.xSpam) {
     L.push('SPAM FILTER');
     if (r.xSpam.flag)   L.push(`  FLAG:    ${r.xSpam.flag}`);
@@ -628,4 +705,9 @@ function esc(str) {
 
 (function init() {
   renderHistory();
+  // Overview is the landing page for first-time visitors; once someone
+  // explicitly switches to Workspace, that choice is remembered instead.
+  let savedView = 'overview';
+  try { savedView = localStorage.getItem(VIEW_KEY) === 'workspace' ? 'workspace' : 'overview'; } catch (_) {}
+  switchView(savedView);
 })();

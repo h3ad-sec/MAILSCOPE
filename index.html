@@ -6,7 +6,9 @@
   <title>MAILSCOPE — Email Header Analyzer</title>
   <meta name="description" content="MAILSCOPE by H3AD-SEC — Parse raw email headers. SPF, DKIM, DMARC verdicts. Hop chain analysis. Spoofing and impersonation detection.">
   <link rel="icon" href="https://h3ad-sec.github.io/fevicon.png?v=2026" type="image/png">
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Exo+2:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=20260528c">
 </head>
 <body class="dark">
@@ -32,6 +34,7 @@
           <a href="https://h3ad-sec.github.io/PARSE-X/" target="_blank" rel="noopener">PARSE-X</a>
           <a href="https://h3ad-sec.github.io/DNSCOPE/" target="_blank" rel="noopener">DNSCOPE</a>
           <a href="https://h3ad-sec.github.io/MAILSCOPE/" target="_blank" rel="noopener" class="nav-current">MAILSCOPE</a>
+          <a href="https://h3ad-sec.github.io/INFRA-SCOPE/" target="_blank" rel="noopener">INFRA-SCOPE</a>
         </div></div>
       </div>
       <div class="nav-item">
@@ -86,6 +89,10 @@
       <a href="mailto:h3adsec@gmail.com">CONTACT</a>
     </div>
     <div class="nav-right">
+      <div class="view-tabs" id="view-tabs">
+        <button class="view-tab active" data-view="overview" onclick="switchView('overview')">OVERVIEW</button>
+        <button class="view-tab" data-view="workspace" onclick="switchView('workspace')">WORKSPACE</button>
+      </div>
       <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" role="button" aria-label="Toggle light/dark theme">
         <div class="toggle-track"><div class="toggle-thumb"></div></div>
       </div>
@@ -100,6 +107,7 @@
     <a href="https://h3ad-sec.github.io/PARSE-X/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ PARSE-X ↗</a>
     <a href="https://h3ad-sec.github.io/DNSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ DNSCOPE ↗</a>
     <a href="https://h3ad-sec.github.io/MAILSCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub nav-current">↳ MAILSCOPE ↗</a>
+    <a href="https://h3ad-sec.github.io/INFRA-SCOPE/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ INFRA-SCOPE ↗</a>
     <a href="https://h3ad-sec.github.io/H3AD-AI/" onclick="closeDrawer()">H3AD-AI</a>
     <a href="https://h3ad-sec.github.io/VERDIKT-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ VERDIKT-AI ↗</a>
     <a href="https://h3ad-sec.github.io/INSIGHT-AI/" target="_blank" rel="noopener" onclick="closeDrawer()" class="drawer-sub">↳ INSIGHT-AI ↗</a>
@@ -128,40 +136,92 @@
     <a href="mailto:h3adsec@gmail.com" onclick="closeDrawer()">CONTACT</a>
   </div>
 
-  <section class="ms-hero">
-    <div class="hero-inner">
-      <div class="hero-left">
-        <div class="hero-breadcrumb">
-          <a href="https://h3ad-sec.github.io/H3AD-X/">H3AD-X</a>
-          <span>/</span>
-          <span class="hero-current">MAILSCOPE</span>
-        </div>
-        <div class="hero-title">
-          <span class="hero-accent">MAIL</span><span class="hero-name">SCOPE</span>
-        </div>
-        <div class="hero-tagline">Email Header Analyzer · SPF · DKIM · DMARC · Hop Chain · Spoofing Detection</div>
+  <div class="ms-view-wrap" id="msViewWrap">
+  <section id="view-overview" class="mv-view">
+    <div class="mv-banner"><span class="xv-pill-accent">MAIL</span><span class="xv-pill-text">SCOPE</span></div>
+    <div class="mv-tagline">See What The Headers Actually Say.</div>
+    <div class="mv-by">by H3AD</div>
+
+    <div class="mv-intro">
+      <h1 class="mv-title">Email Header Forensics: <span>SPF</span>, <span>DKIM</span>, <span>DMARC</span>, Hop Chain, and Spoofing Detection</h1>
+      <p class="mv-sub">Paste raw headers from any email client, SIEM export, or mail-gateway log. MAILSCOPE reconstructs the delivery path, checks authentication, and runs 21 risk checks built specifically for phishing and BEC triage. Everything is parsed right here in your browser tab, nothing is uploaded, queried, or logged, not even to an H3AD-SEC server.</p>
+    </div>
+
+    <div class="mv-stats">
+      <div class="mv-stat"><span class="mv-stat-num">21</span><span class="mv-stat-label">Risk Checks</span></div>
+      <div class="mv-stat"><span class="mv-stat-num">0</span><span class="mv-stat-label">Servers Touched</span></div>
+      <div class="mv-stat"><span class="mv-stat-num">100%</span><span class="mv-stat-label">Client-Side</span></div>
+    </div>
+
+    <div class="mv-cols">
+      <div class="mv-col">
+        <h2 class="mv-col-title">HOW TO USE</h2>
+        <ol class="mv-steps">
+          <li><strong>Copy the raw headers:</strong> Gmail &rarr; Show original, Outlook &rarr; File &rarr; Properties, Thunderbird &rarr; More &rarr; View Source, or straight out of a SIEM/mail-gateway export.</li>
+          <li><strong>Paste and analyze:</strong> drop them into RAW HEADERS and click ANALYZE, or press <code>Ctrl+Enter</code>. No sample data required, but LOAD SAMPLE HEADER is there if you just want to see it work first.</li>
+          <li><strong>Read top to bottom:</strong> the verdict banner gives the overall call, then auth badges, hop chain, and the numbered risk-flag list explain exactly why.</li>
+          <li><strong>Pivot or export:</strong> click any hop IP for X-VERDIKT, any hostname for DNSCOPE, the origin-IP card for a PHISHOPS handoff, or COPY ANALYSIS for a plain-text case note.</li>
+        </ol>
       </div>
-      <div class="hero-stats">
-        <div class="stat-item">
-          <span class="stat-num" id="stat-hops">—</span>
-          <span class="stat-label">Hops</span>
+      <div class="mv-col">
+        <h2 class="mv-col-title">QUICK REFERENCE</h2>
+        <div class="mv-shortcuts">
+          <div class="mv-shortcut-row"><kbd>Ctrl</kbd><kbd>Enter</kbd><span>Analyze</span></div>
         </div>
-        <div class="stat-item">
-          <span class="stat-num" id="stat-flags">—</span>
-          <span class="stat-label">Risk Flags</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num" id="stat-high">—</span>
-          <span class="stat-label">High</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-num" id="stat-transit">—</span>
-          <span class="stat-label">Transit</span>
+        <p class="mv-col-note">Every analysis is saved to RECENT in the sidebar (last 5, this browser only) with verdict, hop count, and flag count at a glance, so you can jump back into a prior case without re-pasting headers.</p>
+      </div>
+    </div>
+
+    <div class="mv-col mv-col-wide">
+      <h2 class="mv-col-title">HOW THE ENGINE WORKS</h2>
+      <ol class="mv-pipeline">
+        <li><strong>Unfold and tokenize.</strong> RFC 5322 continuation lines get joined back into single logical headers, then split into key/value pairs. <code>Received</code>, <code>Authentication-Results</code>, <code>ARC-Seal</code>, and <code>ARC-Authentication-Results</code> are collected as arrays since real messages carry more than one of each.</li>
+        <li><strong>Decode and normalize.</strong> RFC 2047 encoded subjects (base64 or quoted-printable, any charset) are decoded back to plain text, and From/Reply-To/Return-Path/To are split into display name, address, and domain for every mismatch check downstream.</li>
+        <li><strong>Pull authentication verdicts.</strong> SPF/DKIM/DMARC are read from the receiving server's own <code>Authentication-Results</code> header (falling back to <code>Received-SPF</code> when absent), the ARC chain is merged by instance number, and Microsoft 365's <code>X-Forefront-Antispam-Report</code> is parsed for SCL, connecting IP, and Microsoft's own compauth verdict when present.</li>
+        <li><strong>Reconstruct the hop chain.</strong> Every <code>Received</code> header is parsed for IP, from/by/protocol, and timestamp, then walked oldest to newest to compute transit time. Origin-IP resolution skips localhost and RFC1918 relay hops (a compromised host talking to its own local mail server is a common phishing-kit artifact) and prefers Microsoft 365's connecting IP when available, so the reported origin is a real public address, not a loopback picked up from an internal relay.</li>
+        <li><strong>Run the risk engine.</strong> 21 checks fire against everything parsed above: auth failures, domain mismatches, brand impersonation including combosquats like <code>paypal-secure.net</code>, punycode/IDN domains decoded and checked against Unicode confusables, suspicious subject patterns, date anomalies, hop anomalies, and Microsoft 365 signals.</li>
+        <li><strong>Render the verdict.</strong> HIGH, MEDIUM, LOW, or CLEAN, driven by the single worst flag found. Colors are amber, blue, and gray, never red or green, so the verdict reads the same regardless of color vision.</li>
+      </ol>
+    </div>
+
+    <div class="mv-col mv-col-wide">
+      <h2 class="mv-col-title">WHAT GETS CHECKED</h2>
+      <div class="mv-feature-grid">
+        <div class="mv-feature"><strong>Auth failures</strong>SPF, DKIM, and DMARC results straight from the receiving server, plus ARC chain validation for forwarded or mailing-list mail.</div>
+        <div class="mv-feature"><strong>Domain mismatches</strong>Return-Path, Reply-To, Message-ID, and envelope (Delivered-To / X-Original-To) checked against the From domain.</div>
+        <div class="mv-feature"><strong>Brand impersonation</strong>Display name claims a known brand while the domain isn't that brand's own, catching combosquats like <code>paypal-secure.net</code>, not just unrelated domains.</div>
+        <div class="mv-feature"><strong>IDN &amp; homograph domains</strong>Punycode domains are decoded back to Unicode and checked for Cyrillic/Greek lookalike characters against 22 known brands, not just digit substitution.</div>
+        <div class="mv-feature"><strong>Hop chain anomalies</strong>Missing or single-hop chains, free-mail relays in a claimed-corporate path, and sub-second hop delays that suggest bulk sending.</div>
+        <div class="mv-feature"><strong>Microsoft 365 signals</strong>Spam Confidence Level and compauth from X-Forefront-Antispam-Report, independent of the raw SPF/DKIM/DMARC results.</div>
+      </div>
+    </div>
+
+    <div class="mv-col mv-col-wide">
+      <h2 class="mv-col-title">READING YOUR RESULTS</h2>
+      <div class="mv-feature-grid">
+        <div class="mv-feature"><strong>Verdict banner</strong>HIGH/MEDIUM/LOW/CLEAN, set by the worst flag found, with a one-line SPF/DKIM/DMARC summary next to it.</div>
+        <div class="mv-feature"><strong>Auth badges</strong>Read from the receiving MTA's Authentication-Results header, not re-verified against DNS. Treat as a strong signal, not ground truth, a receiving server that doesn't strip untrusted headers could theoretically be fed a forged one.</div>
+        <div class="mv-feature"><strong>Hop chain</strong>Oldest to newest, with per-hop delay and total transit time. Any hop's IP pivots straight to X-VERDIKT, any hostname to DNSCOPE.</div>
+        <div class="mv-feature"><strong>Origin IP card</strong>The resolved public origin, separate from the visual hop timeline, with one-click enrich and a PHISHOPS handoff pre-filled with subject, sender, and IP.</div>
+        <div class="mv-feature"><strong>Risk flags</strong>Every flag numbered, with a severity badge and a plain-language reason, not just a code name.</div>
+        <div class="mv-feature mv-feature-wide">
+          <strong>Severity colors</strong>
+          <div class="mv-legend-grid">
+            <span class="mv-legend-chip" style="border-left-color:var(--status-partial)"><b style="color:var(--status-partial)">HIGH</b>Strong indicator</span>
+            <span class="mv-legend-chip" style="border-left-color:var(--secondary)"><b style="color:var(--secondary)">MEDIUM</b>Worth checking</span>
+            <span class="mv-legend-chip" style="border-left-color:var(--muted)"><b style="color:var(--text-dim)">LOW</b>Minor / informational</span>
+            <span class="mv-legend-chip" style="border-left-color:var(--accent)"><b style="color:var(--accent)">CLEAN</b>No flags raised</span>
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="mv-cta-row">
+      <button class="mv-cta" onclick="switchView('workspace')">OPEN WORKSPACE &rarr;</button>
+    </div>
   </section>
 
+  <div id="view-workspace" style="display:none">
   <main class="ms-main">
     <div class="ms-layout">
 
@@ -254,6 +314,26 @@ Ctrl+Enter to analyze"></textarea>
         <!-- Analysis results (hidden until analyzed) -->
         <div id="results-section" style="display:none">
 
+          <!-- Live stats -->
+          <div class="ws-stats">
+            <div class="stat-item">
+              <span class="stat-num" id="stat-hops">—</span>
+              <span class="stat-label">Hops</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" id="stat-flags">—</span>
+              <span class="stat-label">Risk Flags</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" id="stat-high">—</span>
+              <span class="stat-label">High</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num" id="stat-transit">—</span>
+              <span class="stat-label">Transit</span>
+            </div>
+          </div>
+
           <!-- Verdict banner -->
           <div class="verdict-banner verdict-clean" id="verdict-banner"></div>
 
@@ -268,6 +348,9 @@ Ctrl+Enter to analyze"></textarea>
               </div>
             </div>
             <div class="auth-badges" id="auth-badges"></div>
+            <div class="auth-caveat" style="padding:8px 14px 0;font-size:11px;color:var(--muted)">
+              SPF/DKIM/DMARC verdicts are read from the receiving server's Authentication-Results header, not re-verified against DNS. A forged Authentication-Results header is possible if the receiving MTA doesn't strip untrusted ones — treat these as strong signals, not ground truth.
+            </div>
           </div>
 
           <!-- ARC Chain (conditional) -->
@@ -371,6 +454,24 @@ Ctrl+Enter to analyze"></textarea>
             </div>
           </div>
 
+          <!-- Microsoft 365 signals (conditional) -->
+          <div class="result-card" id="m365-card" style="display:none">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                  <rect x="1" y="1" width="4" height="4" fill="var(--accent)"/>
+                  <rect x="6" y="1" width="4" height="4" fill="var(--accent)"/>
+                  <rect x="1" y="6" width="4" height="4" fill="var(--accent)"/>
+                  <rect x="6" y="6" width="4" height="4" fill="var(--accent)"/>
+                </svg>
+                MICROSOFT 365 SIGNALS
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="ov-table"><tbody id="m365-tbody"></tbody></table>
+            </div>
+          </div>
+
           <!-- X-Spam (conditional) -->
           <div class="result-card" id="xspam-card" style="display:none">
             <div class="card-header">
@@ -408,6 +509,8 @@ Ctrl+Enter to analyze"></textarea>
 
     </div>
   </main>
+  </div>
+  </div>
 
   <footer class="site-footer">
     <div class="footer-inner">
@@ -415,7 +518,14 @@ Ctrl+Enter to analyze"></textarea>
       <span class="footer-sep">/</span>
       <span class="footer-project">MAILSCOPE</span>
       <span class="footer-sep">//</span>
-      <span>SPF · DKIM · DMARC · ARC · Hop Chain · Brand Impersonation · Domain Mismatch · Homograph · Envelope Mismatch · Suspicious Subject · Date Validation · X-Spam</span>
+      <span>SPF · DKIM · DMARC · ARC · Hop Chain · Brand Impersonation · Domain Mismatch · IDN/Homograph · Envelope Mismatch · Suspicious Subject · Date Validation · X-Spam · M365 Signals</span>
+    </div>
+    <div class="footer-credit-row">
+      <a class="footer-credit-pill" href="https://www.linkedin.com/in/hrushikesh-badgujar/" target="_blank" rel="noopener" title="Connect on LinkedIn">
+        <span class="credit-tool"><span class="xv-pill-accent">MAIL</span><span class="xv-pill-text">SCOPE</span></span>
+        <span class="credit-by">created by</span>
+        <span class="credit-name">H3AD</span>
+      </a>
     </div>
   </footer>
 
@@ -445,40 +555,6 @@ Ctrl+Enter to analyze"></textarea>
     const _t = localStorage.getItem('h3ad-theme');
     if (_t === 'light') { document.body.classList.add('light'); document.body.classList.remove('dark'); updateNavLogo('light'); }
     else { document.body.classList.add('dark'); document.body.classList.remove('light'); }
-
-    (function(){var pill=document.querySelector('.xv-nav-pill'),links=document.querySelector('.nav-links'),toggle=document.querySelector('.theme-toggle'),G=20;function check(){if(!links)return;document.body.classList.remove('nav-compact');links.style.visibility='hidden';var lr=links.getBoundingClientRect(),pr=pill?pill.getBoundingClientRect().right:60,tl=toggle?toggle.getBoundingClientRect().left:window.innerWidth-60;links.style.visibility='';document.body.classList.toggle('nav-compact',(pr+G>lr.left)||(lr.right+G>tl));}check();window.addEventListener('resize',check);})();
-  </script>
-  <div id="h3gc" style="position:fixed;bottom:16px;right:16px;display:flex;align-items:center;gap:6px;background:rgba(8,10,18,.9);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:5px 10px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.45);z-index:9500;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);pointer-events:none;">
-    <svg width="7" height="7" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="3.5" stroke="rgba(74,222,128,.7)" stroke-width="1"/><circle cx="4" cy="4" r="1.5" fill="rgba(74,222,128,.8)"/></svg>
-    <span id="h3gc-n" style="color:rgba(74,222,128,.9);font-weight:600">—</span>
-    <span style="opacity:.5">VISITORS</span>
-  </div>
-  <!-- h3gc-v3 -->
-  <script>
-    (function(){
-      var key = (location.pathname.split('/').join('') || 'hub').toLowerCase();
-      var base = 'https://api.counterapi.dev/v1/h3ad-sec/' + key;
-      var lk = 'h3gc_c_' + key;
-      var sk = 'h3gc_s_' + key;
-      var el = document.getElementById('h3gc-n');
-      function store(k,v){try{localStorage.setItem(k,v);}catch(e){}}
-      function session(k){try{return sessionStorage.getItem(k);}catch(e){return null;}}
-      function sessionSet(k,v){try{sessionStorage.setItem(k,v);}catch(e){}}
-      try{ var cached=localStorage.getItem(lk); if(el&&cached) el.textContent=Number(cached).toLocaleString(); }catch(e){}
-      var seen = session(sk);
-      if (!seen) sessionSet(sk,'1');
-      fetch(seen ? base + '/' : base + '/up')
-        .then(function(r){ if(!r.ok) throw r; return r.json(); })
-        .then(function(d){
-          if(d.count!=null){ store(lk,d.count); if(el) el.textContent=Number(d.count).toLocaleString(); }
-        })
-        .catch(function(){});
-      var gsk = 'h3gc_s_total';
-      if (!session(gsk)) {
-        sessionSet(gsk,'1');
-        fetch('https://api.counterapi.dev/v1/h3ad-sec/total/up').catch(function(){});
-      }
-    })();
   </script>
 </body>
 </html>
