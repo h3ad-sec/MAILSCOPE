@@ -675,6 +675,7 @@ body.light .btn-analyze { color: #fff; }
 .footer-credit-pill .credit-tool { font-weight: 700; letter-spacing: 2px; }
 .footer-credit-pill .credit-by { color: var(--muted); }
 .footer-credit-pill .credit-name { color: var(--accent); font-weight: 700; letter-spacing: .5px; }
+.footer-copyright { color: var(--muted); font-family: 'Exo 2', sans-serif; font-size: var(--fs-xs); }
 
 /* ── Header count chip ────────────────────────────────────────────────────── */
 
