@@ -664,7 +664,7 @@ body.light .btn-analyze { color: #fff; }
 .footer-project { color: var(--secondary); }
 .footer-sep { color: var(--border); }
 
-.footer-credit-row { display: flex; justify-content: center; margin-top: 16px; }
+.footer-credit-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
 .footer-credit-pill {
   display: inline-flex; flex-wrap: nowrap; align-items: center; gap: 6px;
   padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px;
@@ -799,3 +799,7 @@ body.light .btn-analyze { color: #fff; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* H3AD-SEC MENU SYNC: hamburger-only nav */
+.nav-links{display:none!important;}
+.hamburger{display:flex!important;}
