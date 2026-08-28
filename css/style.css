@@ -47,7 +47,7 @@ body.light {
 body.light { font-weight: 500; }
 body.light .action-note,
 body.light .card-meta,
-body.light .footer-inner,
+body.light .footer-top,
 body.light .empty-sub { font-weight: 400; }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -656,15 +656,19 @@ body.light .btn-analyze { color: #fff; }
   font-family: var(--mono); font-size: 10px; color: var(--muted);
   line-height: 1.7;
 }
-.footer-inner {
+.footer-top {
   max-width: 1140px; margin: 0 auto;
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem 1.5rem; flex-wrap: wrap;
 }
-.footer-brand { color: var(--accent); text-decoration: none; }
-.footer-project { color: var(--secondary); }
-.footer-sep { color: var(--border); }
+.footer-left { color: var(--muted); }
+.footer-right { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; }
+.footer-src-list {
+  max-width: 1140px; margin: 10px auto 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;
+  text-align: center;
+}
 
-.footer-credit-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.footer-credit-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
 .footer-credit-pill {
   display: inline-flex; flex-wrap: nowrap; align-items: center; gap: 6px;
   padding: 4px 12px; border: 1px solid var(--border); border-radius: 999px;
@@ -675,7 +679,11 @@ body.light .btn-analyze { color: #fff; }
 .footer-credit-pill .credit-tool { font-weight: 700; letter-spacing: 2px; }
 .footer-credit-pill .credit-by { color: var(--muted); }
 .footer-credit-pill .credit-name { color: var(--accent); font-weight: 700; letter-spacing: .5px; }
-.footer-copyright { color: var(--muted); font-family: 'Exo 2', sans-serif; font-size: var(--fs-xs); }
+
+@media (max-width: 860px) {
+  .footer-top { flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 0.6rem; }
+  .footer-credit-row { justify-content: center; }
+}
 
 /* ── Header count chip ────────────────────────────────────────────────────── */
 
