@@ -63,6 +63,8 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   font-size: var(--fs-base);
   line-height: 1.55;
   overflow-x: hidden;
@@ -187,7 +189,7 @@ body.light .toggle-thumb { transform: translateX(22px); }
 
 /* ── Overview / landing page ──────────────────────────────────────────────── */
 
-.ms-view-wrap { margin-top: var(--nav-h); }
+.ms-view-wrap { margin-top: var(--nav-h); flex: 1 0 auto; width: 100%; }
 .mv-view { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 20px 32px 56px; animation: fadeIn .3s ease; }
 .mv-banner { display: flex; justify-content: center; align-items: baseline; gap: 2px; font-family: var(--sans); font-weight: 700; font-size: clamp(26px,5vw,42px); letter-spacing: 4px; }
 .mv-tagline { text-align: center; font-family: var(--sans); font-size: var(--fs-xs); color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: -6px; }
@@ -651,21 +653,24 @@ body.light .btn-analyze { color: #fff; }
 /* ── Footer ───────────────────────────────────────────────────────────────── */
 
 .site-footer {
-  border-top: 1px solid var(--border-dim);
+  border-top: 1px solid var(--border);
   padding: 16px 28px;
-  font-family: var(--mono); font-size: 10px; color: var(--muted);
   line-height: 1.7;
+  flex-shrink: 0;
+  width: 100%;
 }
 .footer-top {
-  max-width: 1140px; margin: 0 auto;
+  width: 100%; margin: 0;
   display: flex; align-items: center; justify-content: space-between; gap: 0.5rem 1.5rem; flex-wrap: wrap;
+  font-family: var(--ui); font-size: var(--fs-xs); color: var(--muted);
 }
 .footer-left { color: var(--muted); }
 .footer-right { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; }
 .footer-src-list {
-  max-width: 1140px; margin: 10px auto 0;
+  width: 100%; margin: 10px 0 0;
   display: flex; flex-wrap: wrap; justify-content: center; gap: 5px;
   text-align: center;
+  font-family: var(--mono); font-size: var(--fs-xs); color: var(--muted);
 }
 
 .footer-credit-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
