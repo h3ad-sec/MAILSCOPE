@@ -690,6 +690,9 @@ body.light .btn-analyze { color: #fff; }
   .footer-credit-row { justify-content: center; }
 }
 
+.footer-top,.footer-left,.footer-right,.footer-src-list,.footer-credit-pill .credit-by{color:#8b949e;}
+body.light .footer-top,body.light .footer-left,body.light .footer-right,body.light .footer-src-list,body.light .footer-credit-pill .credit-by{color:#2E343B;}
+
 /* ── Header count chip ────────────────────────────────────────────────────── */
 
 .header-count-chip {
